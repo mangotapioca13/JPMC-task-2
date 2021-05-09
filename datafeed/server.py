@@ -19,8 +19,8 @@
 #  DEALINGS IN THE SOFTWARE.
 
 from itertools import izip
-from random    import normalvariate, random
-from datetime  import timedelta, datetime
+from random import normalvariate, random
+from datetime import timedelta, datetime
 
 import csv
 import dateutil.parser
@@ -32,7 +32,7 @@ import re
 import threading
 
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
-from SocketServer   import ThreadingMixIn
+from SocketServer import ThreadingMixIn
 
 ################################################################################
 #
@@ -40,14 +40,14 @@ from SocketServer   import ThreadingMixIn
 
 # Sim params
 
-REALTIME    = False
-SIM_LENGTH  = timedelta(days = 365 * 5)
-MARKET_OPEN = datetime.today().replace(hour = 0, minute = 30, second = 0)
+REALTIME = False
+SIM_LENGTH = timedelta(days=365 * 5)
+MARKET_OPEN = datetime.today().replace(hour=0, minute=30, second=0)
 
 # Market parms
-#       min  / max  / std
-SPD  = (2.0,   6.0,   0.1)
-PX   = (60.0,  150.0, 0.2)
+#      min  / max  / std
+SPD = (2.0,   6.0,   0.1)
+PX = (60.0,  150.0, 0.2)
 FREQ = (12,    36,   50)
 
 # Trades
@@ -79,9 +79,9 @@ def orders(hist):
     """
     for t, px, spd in hist:
         stock = 'ABC' if random() > 0.5 else 'DEF'
-        side, d  = ('sell', 2) if random() > 0.5 else ('buy', -2)
+        side, d = ('sell', 2) if random() > 0.5 else ('buy', -2)
         order = round(normalvariate(px + (spd / d), spd / OVERLAP), 2)
-        size  = int(abs(normalvariate(0, 100)))
+        size = int(abs(normalvariate(0, 100)))
         yield t, stock, side, order, size
 
 
@@ -119,7 +119,7 @@ def clear_book(buy = None, sell = None):
         new_book = clear_order(order, size, sell)
         if new_book:
             sell = new_book[1]
-            buy  = buy[1:]
+            buy = buy[1:]
         else:
             break
     return buy, sell
@@ -132,7 +132,7 @@ def order_book(orders, book, stock_name):
     for t, stock, side, order, size in orders:
         if stock_name == stock:
             new = add_book(book.get(side, []), order, size)
-            book[side] = sorted(new, reverse = side == 'buy', key = lambda x: x[0])
+            book[side] = sorted(new, reverse=side == 'buy', key=lambda x: x[0])
         bids, asks = clear_book(**book)
         yield t, bids, asks
 
@@ -214,7 +214,7 @@ def run(routes, host = '0.0.0.0', port = 8080):
     thread = threading.Thread(target = server.serve_forever)
     thread.daemon = True
     thread.start()
-    print 'HTTP server started on port 8080'
+    print ('HTTP server started on port 8080')
     while True:
         from time import sleep
         sleep(1)
@@ -274,7 +274,7 @@ class App(object):
         t1, bids1, asks1 = self._current_book_1.next()
         t2, bids2, asks2 = self._current_book_2.next()
         t = t1 if t1 > t2 else t2
-        print 'Query received @ t%s' % t
+        print ('Query received @ t%s' % t)
         return [{
             'id': x and x.get('id', None),
             'stock': 'ABC',
@@ -308,6 +308,6 @@ class App(object):
 
 if __name__ == '__main__':
     if not os.path.isfile('test.csv'):
-        print "No data found, generating..."
+        print ("No data found, generating...")
         generate_csv()
     run(App())
